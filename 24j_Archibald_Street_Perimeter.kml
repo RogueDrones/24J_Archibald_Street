@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="24jarchibaldstreet_perimeter" id="24jarchibaldstreet_perimeter">
+	<SimpleField name="id" type="float"></SimpleField>
+</Schema>
+<Folder><name>24jarchibaldstreet_perimeter</name>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+      <MultiGeometry><Polygon><outerBoundaryIs><LinearRing><coordinates>170.532629135589,-45.8881518190569 170.532624760542,-45.8881716156704 170.532455974852,-45.8883155820638 170.532750926928,-45.8884877141061 170.532917721842,-45.8883492005092 170.532917721842,-45.8883492005092 170.533226921871,-45.888531104849 170.533244172735,-45.8885139418589 170.53262857974,-45.8881516761848 170.532629135589,-45.8881518190569</coordinates></LinearRing></outerBoundaryIs></Polygon></MultiGeometry>
+  </Placemark>
+</Folder>
+</Document></kml>

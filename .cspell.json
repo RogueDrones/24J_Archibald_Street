@@ -1,0 +1,41 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "archibald",
+        "tailwindcss",
+        "lucide",
+        "vite",
+        "roboto",
+        "cityville",
+        "openstreetmap",
+        "mapbox",
+        "cloudflare",
+        "predeploy",
+        "YYYYMMDD",
+        "Mapnik",
+        "HVAC",
+        "yourusername",
+        "doesn",
+        "hardscaping"
+    ],
+    "flagWords": [],
+    "ignorePaths": [
+        "node_modules/**",
+        "dist/**",
+        ".git/**",
+        "public/vite.svg"
+    ],
+    "ignoreRegExpList": [
+        "/'[^']*'/",
+        "/\"[^\"]*\"/",
+        "/\\(.*\\)/"
+    ],
+    "dictionaries": [
+        "typescript",
+        "node",
+        "npm",
+        "html",
+        "css"
+    ]
+}
