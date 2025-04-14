@@ -465,6 +465,39 @@ This approach allows you to build incrementally and test each component as you g
 Would you like me to help with any specific component implementation first?
 ```
 
+# documentation\git_commands.md
+
+```md
+# 1) Initialize a local Git repository (if not already done)
+
+git init
+
+# 2) Check the current status
+
+git status
+
+# 3) Stage all files
+
+git add .
+
+# 4) Commit the files
+
+git commit -m "Initial commit"
+
+# 5) Switch to 'main' branch (if you're not on it already)
+
+git branch -M main
+
+# 6) Add the remote origin (replace URL with your repo)
+
+git remote add origin https://github.com/RogueDrones/24J_Archibald_Street.git
+
+# 7) Push the local 'main' branch to the 'main' branch on GitHub
+
+git push -u origin main
+
+```
+
 # documentation\phase_updates.md
 
 ```md
@@ -755,12 +788,15 @@ export default tseslint.config(
   "name": "24j-archibald-construction-tracker",
   "private": true,
   "version": "0.1.0",
+  "homepage": "https://RogueDrones.github.io/24J_Archibald_Street",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@mapbox/togeojson": "^0.16.2",
@@ -780,6 +816,7 @@ export default tseslint.config(
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
+    "gh-pages": "^6.3.0",
     "globals": "^15.9.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
@@ -1013,7 +1050,7 @@ For questions or support, please contact the project maintainer at your.email@ex
 // src/App.tsx
 
 import { useState } from 'react';
-import { Calendar, Info, Home } from 'lucide-react';
+import { Calendar, Home } from 'lucide-react';
 import ProjectMap from './components/ProjectMap';
 import Timeline from './components/Timeline';
 import ImageViewer from './components/ImageViewer';
@@ -1021,88 +1058,90 @@ import { projectData } from './data/projectData';
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(projectData.timeline[0].date);
-  const [showInfo, setShowInfo] = useState(false);
   
-  // Find the current timeline index
   const currentTimelineIndex = projectData.timeline.findIndex(
     item => item.date === selectedDate
   );
   
   const currentTimelineItem = projectData.timeline[currentTimelineIndex];
-  
-  // Calculate project progress percentage
   const completedPhases = projectData.timeline.filter(item => item.milestoneCompleted).length;
   const progressPercentage = Math.round((completedPhases / projectData.timeline.length) * 100);
   
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="bg-blue-800 text-white p-4 shadow-md">
+      <header className="bg-blue-800/90 text-white p-4 shadow-md relative z-10">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Home className="h-6 w-6" />
             <h1 className="text-xl md:text-2xl font-bold">{projectData.projectName}</h1>
           </div>
-          <div className="flex space-x-2">
-            <button 
-              onClick={() => setShowInfo(!showInfo)}
-              className="flex items-center space-x-1 bg-blue-700 hover:bg-blue-900 px-3 py-1 rounded-md transition-colors"
-            >
-              <Info className="h-4 w-4" />
-              <span>Project Info</span>
-            </button>
-          </div>
         </div>
       </header>
+
+      {/* Hero Section with Map Background */}
+      <div className="relative h-[60vh] overflow-hidden">
+        <div className="absolute inset-0">
+          <ProjectMap coordinates={projectData.coordinates} location={projectData.location} />
+        </div>
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
+          <div className="text-center max-w-4xl mx-auto p-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">{projectData.projectName}</h2>
+            <p className="text-xl md:text-2xl mb-6">{projectData.description}</p>
+            <div className="inline-flex items-center bg-blue-600 px-6 py-3 rounded-lg text-lg font-semibold">
+              <Calendar className="h-5 w-5 mr-2" />
+              <span>Progress: {progressPercentage}% Complete</span>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {/* Main Content */}
       <main className="flex-grow container mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
-        {/* Left Column - Map and Image */}
+        {/* Left Column - Content */}
         <div className="lg:w-2/3 flex flex-col space-y-6">
-          {/* Project Info Panel */}
-          {showInfo && (
-            <div className="bg-white p-4 rounded-lg shadow-md animate-fadeIn">
-              <h2 className="text-xl font-semibold mb-2">About This Project</h2>
-              <p className="text-gray-700 mb-3">{projectData.description}</p>
-              
-              {/* Project Overview Stats */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <h3 className="font-medium text-gray-900">Location</h3>
-                  <p className="text-gray-600">{projectData.location}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Project Area</h3>
-                  <p className="text-gray-600">{projectData.area}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Start Date</h3>
-                  <p className="text-gray-600">{projectData.startDate}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Estimated Completion</h3>
-                  <p className="text-gray-600">{projectData.estimatedCompletion}</p>
-                </div>
+          {/* Project Info Panel - Now permanently visible */}
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-2">About This Project</h2>
+            <p className="text-gray-700 mb-3">{projectData.description}</p>
+            
+            {/* Project Overview Stats */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <h3 className="font-medium text-gray-900">Location</h3>
+                <p className="text-gray-600">{projectData.location}</p>
               </div>
-              
-              {/* Progress Bar */}
-              <div className="mt-2">
-                <div className="flex justify-between items-center mb-1">
-                  <h3 className="font-medium text-gray-900">Overall Progress</h3>
-                  <span className="text-sm font-medium text-blue-700">{progressPercentage}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-blue-600 h-2.5 rounded-full" 
-                    style={{ width: `${progressPercentage}%` }}
-                  ></div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {completedPhases} of {projectData.timeline.length} phases completed
-                </p>
+              <div>
+                <h3 className="font-medium text-gray-900">Project Area</h3>
+                <p className="text-gray-600">{projectData.area}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">Start Date</h3>
+                <p className="text-gray-600">{projectData.startDate}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">Estimated Completion</h3>
+                <p className="text-gray-600">{projectData.estimatedCompletion}</p>
               </div>
             </div>
-          )}
+            
+            {/* Progress Bar */}
+            <div className="mt-2">
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="font-medium text-gray-900">Overall Progress</h3>
+                <span className="text-sm font-medium text-blue-700">{progressPercentage}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-blue-600 h-2.5 rounded-full" 
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {completedPhases} of {projectData.timeline.length} phases completed
+              </p>
+            </div>
+          </div>
           
           {/* Current Image View */}
           <div className="bg-white p-4 rounded-lg shadow-md">
@@ -1119,12 +1158,6 @@ function App() {
                 caption={`${currentTimelineItem.title}: ${currentTimelineItem.description}`} 
               />
             </div>
-          </div>
-          
-          {/* Project Map */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Project Location</h2>
-            <ProjectMap coordinates={projectData.coordinates} location={projectData.location} />
           </div>
         </div>
         
@@ -1143,7 +1176,7 @@ function App() {
       
       {/* Footer */}
       <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>© {new Date().getFullYear()} {projectData.projectName} - Drone Imagery Construction Tracker</p>
+        <p>© {new Date().getFullYear()} {projectData.projectName} - Rogue</p>
       </footer>
     </div>
   );
@@ -1157,7 +1190,8 @@ export default App;
 ```tsx
 // src/components/ImageViewer.tsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface ImageViewerProps {
   images: string[];
@@ -1165,52 +1199,150 @@ interface ImageViewerProps {
 }
 
 const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
-  // Always use the first image in the array
-  const displayImage = images && images.length > 0 ? images[0] : '';
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+
+  // Reset currentIndex when the images prop changes
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [images]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const displayImage = images && images.length > 0 ? images[currentIndex] : '';
 
   return (
-    <div className="relative w-full aspect-video">
-      {/* Main image display */}
-      <img
-        src={displayImage}
-        alt="Construction site aerial view"
-        className="object-contain w-full h-full"
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.onerror = null;
-          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 200'%3E%3Crect fill='%23f0f0f0' width='300' height='200'/%3E%3Ctext fill='%23cccccc' font-family='sans-serif' font-size='24' text-anchor='middle' x='150' y='100'%3ENo image available%3C/text%3E%3C/svg%3E";
-        }}
-      />
+    <>
+      {/* Main image container */}
+      <div className="relative w-full aspect-video">
+        {/* Left Arrow */}
+        {images.length > 1 && (
+          <button
+            onClick={handlePrev}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+        )}
 
-      {/* Caption along the bottom */}
-      {caption && (
-        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 text-sm">
-          {caption}
+        {/* Right Arrow */}
+        {images.length > 1 && (
+          <button
+            onClick={handleNext}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        )}
+
+        {/* Main image display */}
+        <img
+          src={displayImage}
+          alt="Construction site aerial view"
+          className="object-contain w-full h-full cursor-pointer"
+          onClick={() => setShowModal(true)} // Open modal on click
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.onerror = null;
+            target.src =
+              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 200'%3E%3Crect fill='%23f0f0f0' width='300' height='200'/%3E%3Ctext fill='%23cccccc' font-family='sans-serif' font-size='24' text-anchor='middle' x='150' y='100'%3ENo image available%3C/text%3E%3C/svg%3E";
+          }}
+        />
+
+        {/* “Click to Enlarge” indicator */}
+        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+          Click to enlarge
+        </div>
+
+        {/* Caption along the bottom */}
+        {caption && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 text-sm">
+            {caption}
+          </div>
+        )}
+      </div>
+
+      {/* --- Modal for Full-Size View --- */}
+      {showModal && (
+        <div
+          className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center"
+          onClick={() => setShowModal(false)} // Click away closes the modal
+        >
+          {/* Stop clicks on the image from propagating to the backdrop */}
+          <div onClick={(e) => e.stopPropagation()} className="relative">
+            <img
+              src={displayImage}
+              alt="Full size view"
+              className="max-w-full max-h-[90vh]"
+            />
+            <button
+              className="absolute top-2 right-2 bg-black/60 hover:bg-black text-white p-2 rounded-full"
+              onClick={() => setShowModal(false)}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
 export default ImageViewer;
+
 ```
 
 # src\components\ProjectMap.tsx
 
 ```tsx
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, Marker, useMap } from 'react-leaflet';
 import toGeoJSON from '@mapbox/togeojson';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, ExternalLink } from 'lucide-react';
+import L from 'leaflet';
 
 interface ProjectMapProps {
   location: string;
   coordinates: { lat: number; lng: number };
-  zoom?: number;
 }
 
-const ProjectMap: React.FC<ProjectMapProps> = ({ location, coordinates, zoom = 16 }) => {
+// Create a custom marker icon
+const customIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+// Component to handle the zoom animation
+function ZoomAnimation({ coordinates }: { coordinates: { lat: number; lng: number } }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    // Start with a wider view
+    map.setView([coordinates.lat, coordinates.lng], 12, { animate: false });
+    
+    // After a short delay, zoom in smoothly
+    setTimeout(() => {
+      map.flyTo([coordinates.lat, coordinates.lng], 17, {
+        duration: 2.5, // Animation duration in seconds
+        easeLinearity: 0.25
+      });
+    }, 500);
+  }, [map, coordinates]);
+
+  return null;
+}
+
+const ProjectMap: React.FC<ProjectMapProps> = ({ coordinates }) => {
   const [geoJson, setGeoJson] = useState<GeoJSON.GeoJsonObject | null>(null);
 
   useEffect(() => {
@@ -1227,41 +1359,28 @@ const ProjectMap: React.FC<ProjectMapProps> = ({ location, coordinates, zoom = 1
       });
   }, []);
 
-  const fullMapUrl = `https://www.openstreetmap.org/?mlat=${coordinates.lat}&mlon=${coordinates.lng}#map=16/${coordinates.lat}/${coordinates.lng}`;
-
   return (
-    <>
-      <MapContainer center={[coordinates.lat, coordinates.lng]} zoom={zoom} style={{ height: '400px', width: '100%' }}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
-        />
-        {geoJson && <GeoJSON data={geoJson} style={() => ({ color: '#FF0000', weight: 3 })} />}
-      </MapContainer>
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800 mt-4">
-        <div className="flex justify-between items-start">
-          <p className="flex items-center">
-            <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>
-              <strong>24J Archibald Street Development</strong>
-              <br />
-              Location: {location}
-              <br />
-              Coordinates: {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
-            </span>
-          </p>
-          <a
-            href={fullMapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-blue-600 hover:text-blue-800 transition-colors ml-2 text-xs"
-          >
-            <span className="mr-1">View Larger Map</span>
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        </div>
-      </div>
-    </>
+    <MapContainer 
+      center={[coordinates.lat, coordinates.lng]} 
+      zoom={12} // Start with a wider view
+      style={{ height: '100%', width: '100%' }}
+      zoomControl={false}
+      attributionControl={false}
+      dragging={false}
+      scrollWheelZoom={false}
+      doubleClickZoom={false}
+    >
+      <ZoomAnimation coordinates={coordinates} />
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution="&copy; OpenStreetMap contributors"
+      />
+      {geoJson && <GeoJSON data={geoJson} style={() => ({ color: '#FF0000', weight: 3 })} />}
+      <Marker 
+        position={[coordinates.lat, coordinates.lng]} 
+        icon={customIcon}
+      />
+    </MapContainer>
   );
 };
 
@@ -1293,107 +1412,113 @@ interface TimelineProps {
 
 const Timeline: React.FC<TimelineProps> = ({ timelineData, selectedDate, onSelectDate }) => {
   const selectedItemRef = useRef<HTMLDivElement>(null);
-  
-  // Determine current phase and upcoming phases
-  const currentDate = new Date();
-  const currentPhaseIndex = timelineData.findIndex(item => {
-    const itemDate = new Date(item.date);
-    return itemDate > currentDate;
-  }) - 1;
-  
-  // If all phases are in the past, set the last one as current
-  const effectiveCurrentPhaseIndex = currentPhaseIndex === -2 
-    ? timelineData.length - 1 
-    : currentPhaseIndex;
-  
+
+  // 1) Identify the "current" item as the first that is NOT completed.
+  //    If all items are completed, this will be -1 (no current item).
+  const effectiveCurrentPhaseIndex = timelineData.findIndex(
+    (item) => !item.milestoneCompleted
+  );
+
+  // 2) Count completed, current, and upcoming for the summary at the top.
+  const completedCount = timelineData.filter((item) => item.milestoneCompleted).length;
+  const currentCount = effectiveCurrentPhaseIndex >= 0 ? 1 : 0;
+  const upcomingCount = timelineData.length - completedCount - currentCount;
+
   // Scroll to the selected item when it changes
   useEffect(() => {
     if (selectedItemRef.current) {
       selectedItemRef.current.scrollIntoView({
         behavior: 'smooth',
-        block: 'center'
+        block: 'center',
       });
     }
   }, [selectedDate]);
-  
-  // Calculate the total project duration in months
-  const calculateProjectDuration = (): number => {
-    if (timelineData.length < 2) return 0;
-    
-    const startDate = new Date(timelineData[0].date);
-    const endDate = new Date(timelineData[timelineData.length - 1].date);
-    
-    const diffMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
-                      endDate.getMonth() - startDate.getMonth();
-    
-    return diffMonths;
-  };
-  
+
+  // A helper function to get the status of each timeline item
+  function getItemStatus(item: TimelineItem, index: number) {
+    if (item.milestoneCompleted) return 'completed';
+    if (index === effectiveCurrentPhaseIndex) return 'current';
+    return 'upcoming';
+  }
+
   return (
     <div>
-      {/* Phase summary */}
+      {/* --- Phase Summary --- */}
       <div className="mb-4 pb-4 border-b border-gray-200">
         <div className="flex justify-between items-center mb-1">
           <span className="text-sm text-gray-600">Project Phases</span>
           <span className="text-sm text-gray-600">{timelineData.length} total</span>
         </div>
-        
+
         <div className="grid grid-cols-3 gap-2 mb-2">
+          {/* Completed */}
           <div className="flex flex-col items-center p-2 bg-green-50 rounded-md">
             <CheckCircle className="h-5 w-5 text-green-500 mb-1" />
             <span className="text-xs font-medium text-green-700">Completed</span>
             <span className="text-lg font-bold text-green-800">
-              {timelineData.filter(item => item.milestoneCompleted).length}
+              {completedCount}
             </span>
           </div>
-          
+          {/* Current */}
           <div className="flex flex-col items-center p-2 bg-blue-50 rounded-md">
             <Clock className="h-5 w-5 text-blue-500 mb-1" />
             <span className="text-xs font-medium text-blue-700">Current</span>
-            <span className="text-lg font-bold text-blue-800">1</span>
+            <span className="text-lg font-bold text-blue-800">
+              {currentCount}
+            </span>
           </div>
-          
+          {/* Upcoming */}
           <div className="flex flex-col items-center p-2 bg-gray-50 rounded-md">
             <Clock className="h-5 w-5 text-gray-400 mb-1" />
             <span className="text-xs font-medium text-gray-600">Upcoming</span>
             <span className="text-lg font-bold text-gray-700">
-              {timelineData.length - (effectiveCurrentPhaseIndex + 1)}
+              {upcomingCount}
             </span>
           </div>
         </div>
-        
-        {/* Project duration */}
-        <div className="bg-blue-100 p-2 rounded-md mb-2">
-          <p className="text-xs text-blue-800 font-medium mb-1">Project Duration</p>
-          <p className="text-sm font-semibold text-blue-900">
-            Approximately {calculateProjectDuration()} months
-          </p>
-        </div>
-        
-        {/* Current phase indicator */}
-        {effectiveCurrentPhaseIndex >= 0 && (
-          <div className="bg-blue-100 p-2 rounded-md">
-            <p className="text-xs text-blue-800 font-medium mb-1">Current Phase</p>
-            <p className="text-sm font-semibold text-blue-900">
-              {timelineData[effectiveCurrentPhaseIndex].title}
-            </p>
-          </div>
-        )}
       </div>
-      
+
+      {/* --- Timeline Items --- */}
       <div className="overflow-y-auto max-h-[600px] pr-2 timeline-container">
         <div className="relative">
-          {/* Vertical line */}
+          {/* Vertical line in the background */}
           <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-blue-200"></div>
-          
-          {/* Timeline items */}
+
           {timelineData.map((item, index) => {
             const isSelected = item.date === selectedDate;
-            const isPast = item.milestoneCompleted;
-            const isCurrent = index === effectiveCurrentPhaseIndex;
-            
+            const status = getItemStatus(item, index);
+
+            // Dot color
+            let dotClasses = 'bg-gray-300 border-gray-200';
+            if (status === 'completed') {
+              dotClasses = 'bg-green-500 border-green-200';
+            } else if (status === 'current') {
+              dotClasses = 'bg-blue-500 border-blue-200 animate-pulse';
+            }
+
+            // Card border
+            let cardBorder = 'border-gray-200';
+            if (isSelected) {
+              cardBorder = 'border-blue-400 shadow-md';
+            } else if (status === 'completed') {
+              cardBorder = 'border-green-100 shadow-sm';
+            } else if (status === 'current') {
+              cardBorder = 'border-blue-100 shadow-sm';
+            }
+
+            // Status label
+            let statusLabel = '○ Upcoming';
+            let statusLabelColor = 'text-gray-500';
+            if (status === 'completed') {
+              statusLabel = '✓ Completed';
+              statusLabelColor = 'text-green-600';
+            } else if (status === 'current') {
+              statusLabel = '● Current';
+              statusLabelColor = 'text-blue-600';
+            }
+
             return (
-              <div 
+              <div
                 key={item.date}
                 ref={isSelected ? selectedItemRef : null}
                 className={`relative pl-10 pb-6 cursor-pointer transition-all duration-200 ${
@@ -1401,45 +1526,27 @@ const Timeline: React.FC<TimelineProps> = ({ timelineData, selectedDate, onSelec
                 }`}
                 onClick={() => onSelectDate(item.date)}
               >
-                {/* Timeline dot with status indication */}
-                <div 
-                  className={`absolute left-2 top-1.5 w-5 h-5 rounded-full z-10 border-2 ${
-                    isSelected 
-                      ? 'bg-blue-600 border-blue-200' 
-                      : isPast
-                        ? 'bg-green-500 border-green-200'
-                        : isCurrent
-                          ? 'bg-blue-500 border-blue-200 animate-pulse'
-                          : 'bg-gray-300 border-gray-200'
-                  }`}
-                >
-                  {isPast && !isSelected && (
-                    <CheckCircle className="w-4 h-4 text-white absolute top-0.5 left-0.5" />
-                  )}
-                </div>
-                
+                {/* Timeline dot */}
+                <div
+                  className={`absolute left-2 top-1.5 w-5 h-5 rounded-full z-10 border-2 ${dotClasses}`}
+                />
+
                 {/* Content card */}
-                <div 
-                  className={`bg-white rounded-lg p-3 border ${
-                    isSelected 
-                      ? 'border-blue-400 shadow-md' 
-                      : isPast
-                        ? 'border-green-100 shadow-sm'
-                        : isCurrent
-                          ? 'border-blue-100 shadow-sm'
-                          : 'border-gray-200 shadow-sm opacity-80'
-                  }`}
+                <div
+                  className={`bg-white rounded-lg p-3 border ${cardBorder}`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className={`font-medium ${
-                      isSelected 
-                        ? 'text-blue-700' 
-                        : isPast
+                    <h3
+                      className={`font-medium ${
+                        isSelected
+                          ? 'text-blue-700'
+                          : status === 'completed'
                           ? 'text-green-700'
-                          : isCurrent
-                            ? 'text-blue-600'
-                            : 'text-gray-600'
-                    }`}>
+                          : status === 'current'
+                          ? 'text-blue-600'
+                          : 'text-gray-600'
+                      }`}
+                    >
                       {item.title}
                     </h3>
                     <div className="flex items-center text-xs text-gray-500">
@@ -1447,36 +1554,32 @@ const Timeline: React.FC<TimelineProps> = ({ timelineData, selectedDate, onSelec
                       {item.date}
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-                  
+                  <p className="text-sm text-gray-600 line-clamp-2">
+                    {item.description}
+                  </p>
+
                   {/* Status indicator */}
                   <div className="text-xs font-medium mt-2">
-                    <div className="flex">
-                      {isPast && (
-                        <span className="text-green-600 mr-2">✓ Completed</span>
-                      )}
-                      <span className="text-gray-500">○ Upcoming</span>
-                    </div>
+                    <span className={statusLabelColor}>{statusLabel}</span>
                   </div>
-                  
+
                   {/* Preview thumbnail */}
                   <div className="mt-2 h-16 overflow-hidden rounded-md relative">
-                    <img 
-                      src={item.images[0]} 
-                      alt={item.title} 
+                    <img
+                      src={item.images[0]}
+                      alt={item.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.onerror = null;
-                        target.style.background = "#f0f0f0";
-                        target.style.display = "flex";
-                        target.style.alignItems = "center";
-                        target.style.justifyContent = "center";
+                        target.style.background = '#f0f0f0';
+                        target.style.display = 'flex';
+                        target.style.alignItems = 'center';
+                        target.style.justifyContent = 'center';
                       }}
                     />
-                    
-                    {/* Concept badge for future phases */}
-                    {!isPast && (
+                    {/* If you still want a “Concept” badge for upcoming phases */}
+                    {status === 'upcoming' && (
                       <div className="absolute top-1 right-1 bg-yellow-500 text-white px-1 py-0.5 rounded text-[8px]">
                         Concept
                       </div>
@@ -1486,12 +1589,12 @@ const Timeline: React.FC<TimelineProps> = ({ timelineData, selectedDate, onSelec
               </div>
             );
           })}
-          
-          {/* Demo note at the bottom */}
+
           <div className="pl-10 pt-2">
             <div className="text-xs text-gray-500 italic">
-              Note: This timeline represents the projected construction schedule. 
-              Future dates and milestones are estimates for demonstration purposes.
+              Note: This timeline represents the projected construction schedule.
+              Future dates and milestones are estimates for demonstration
+              purposes.
             </div>
           </div>
         </div>
@@ -1501,6 +1604,7 @@ const Timeline: React.FC<TimelineProps> = ({ timelineData, selectedDate, onSelec
 };
 
 export default Timeline;
+
 ```
 
 # src\data\projectData.ts
@@ -1532,7 +1636,7 @@ export interface ProjectDataType {
 }
 
 export const projectData: ProjectDataType = {
-  projectName: "24J Archibald Street Development",
+  projectName: "24J Archibald Street",
   description: "24J Archibald Street is a modern residential construction project. This website offers an interactive timeline and drone-captured aerial imagery, allowing stakeholders to follow each phase of the build.",
   location: "24J Archibald Street, Waverley, Dunedin 9013, New Zealand",
   area: "0.0739 ha, 739m²",
@@ -1546,11 +1650,14 @@ export const projectData: ProjectDataType = {
   // Timeline of construction progress
   timeline: [
     {
-      date: "Mar 15, 2025",
+      date: "Feb 27, 2025",
       title: "Site Preparation",
       description: "Initial site clearing and preparation. Removal of vegetation. Site survey and staking completed.",
       images: [
-        "/images/DJI_0590.JPG"
+        "images/DJI_0590.JPG",
+        "images/DJI_0592.JPG",
+        "images/DJI_0598.JPG",
+        "images/DJI_0600.JPG"
       ],
       milestoneCompleted: true
     },
@@ -1558,49 +1665,49 @@ export const projectData: ProjectDataType = {
       date: "Apr 20, 2025",
       title: "Foundation Work",
       description: "Excavation completed and foundation work began. Footings poured and foundation walls constructed.",
-      images: ["/images/image_fx_5.jpg"],
-      milestoneCompleted: true
+      images: ["images/image_fx_ 5.jpg"],
+      milestoneCompleted: false
     },
     {
       date: "May 25, 2025",
       title: "Framing",
       description: "Structural framing of the main building. First floor walls erected and roof trusses installed.",
-      images: ["/images/image_fx_6.jpg"],
+      images: ["images/image_fx_ 6.jpg"],
       milestoneCompleted: false
     },
     {
       date: "Jun 30, 2025",
       title: "Exterior Construction",
       description: "Exterior sheathing and roofing. Windows and exterior door installation began.",
-      images: ["/images/image_fx_7.jpg"],
+      images: ["images/image_fx_ 7.jpg"],
       milestoneCompleted: false
     },
     {
       date: "Jul 28, 2025",
       title: "Mechanical Systems",
       description: "Installation of electrical, plumbing, and HVAC systems. Rough-in work completed throughout the structure.",
-      images: ["/images/image_fx_7.jpg"],
+      images: ["images/image_fx_ 7.jpg"],
       milestoneCompleted: false
     },
     {
       date: "Sep 15, 2025",
       title: "Interior Finishing",
       description: "Drywall installation and interior finishing work. Cabinetry, fixtures, and appliance installation.",
-      images: ["/images/image_fx_7.jpg"],
+      images: ["images/image_fx_ 7.jpg"],
       milestoneCompleted: false
     },
     {
       date: "Oct 20, 2025",
       title: "Landscaping",
       description: "Exterior grading, landscaping, and hardscaping. Installation of walkways, driveway, and outdoor features.",
-      images: ["/images/image_fx_8.jpg"],
+      images: ["images/image_fx_ 8.jpg"],
       milestoneCompleted: false
     },
     {
       date: "Dec 10, 2025",
       title: "Final Inspection",
       description: "Final inspections and completion of all remaining work. Property ready for occupancy.",
-      images: ["/images/image_fx_9.jpg"],
+      images: ["images/image_fx_ 9.jpg"],
       milestoneCompleted: false
     }
   ]
@@ -1931,6 +2038,7 @@ import react from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/24J_Archibald_Street/', 
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

@@ -24,7 +24,7 @@ export interface ProjectDataType {
 }
 
 export const projectData: ProjectDataType = {
-  projectName: "24J Archibald Street Development",
+  projectName: "24J Archibald Street",
   description: "24J Archibald Street is a modern residential construction project. This website offers an interactive timeline and drone-captured aerial imagery, allowing stakeholders to follow each phase of the build.",
   location: "24J Archibald Street, Waverley, Dunedin 9013, New Zealand",
   area: "0.0739 ha, 739m²",

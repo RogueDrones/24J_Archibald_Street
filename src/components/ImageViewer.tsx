@@ -25,6 +25,24 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!showModal) return;
+      
+      if (e.key === 'ArrowLeft') {
+        handlePrev();
+      } else if (e.key === 'ArrowRight') {
+        handleNext();
+      } else if (e.key === 'Escape') {
+        setShowModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [showModal, images.length]);
+
   const displayImage = images && images.length > 0 ? images[currentIndex] : '';
 
   return (
@@ -81,22 +99,52 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
       {/* --- Modal for Full-Size View --- */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center"
-          onClick={() => setShowModal(false)} // Click away closes the modal
+          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center"
+          onClick={() => setShowModal(false)}
         >
-          {/* Stop clicks on the image from propagating to the backdrop */}
-          <div onClick={(e) => e.stopPropagation()} className="relative">
+          {/* Container for image and navigation controls */}
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="relative max-w-[90vw] max-h-[90vh]"
+          >
+            {/* Navigation arrows in modal */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full z-20 transition-colors"
+                >
+                  <ChevronLeft className="h-8 w-8" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full z-20 transition-colors"
+                >
+                  <ChevronRight className="h-8 w-8" />
+                </button>
+              </>
+            )}
+
             <img
               src={displayImage}
               alt="Full size view"
-              className="max-w-full max-h-[90vh]"
+              className="max-w-full max-h-[90vh] object-contain"
             />
+
+            {/* Close button */}
             <button
-              className="absolute top-2 right-2 bg-black/60 hover:bg-black text-white p-2 rounded-full"
+              className="absolute top-4 right-4 bg-black/60 hover:bg-black text-white p-2 rounded-full transition-colors"
               onClick={() => setShowModal(false)}
             >
-              <X className="h-5 w-5" />
+              <X className="h-6 w-6" />
             </button>
+
+            {/* Image counter */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                {currentIndex + 1} / {images.length}
+              </div>
+            )}
           </div>
         </div>
       )}
