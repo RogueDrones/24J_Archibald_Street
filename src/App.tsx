@@ -11,21 +11,18 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(projectData.timeline[0].date);
   const [showInfo, setShowInfo] = useState(false);
   
-  // Find the current timeline index
   const currentTimelineIndex = projectData.timeline.findIndex(
     item => item.date === selectedDate
   );
   
   const currentTimelineItem = projectData.timeline[currentTimelineIndex];
-  
-  // Calculate project progress percentage
   const completedPhases = projectData.timeline.filter(item => item.milestoneCompleted).length;
   const progressPercentage = Math.round((completedPhases / projectData.timeline.length) * 100);
   
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="bg-blue-800 text-white p-4 shadow-md">
+      <header className="bg-blue-800/90 text-white p-4 shadow-md relative z-10">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Home className="h-6 w-6" />
@@ -42,10 +39,27 @@ function App() {
           </div>
         </div>
       </header>
+
+      {/* Hero Section with Map Background */}
+      <div className="relative h-[60vh] overflow-hidden">
+        <div className="absolute inset-0">
+          <ProjectMap coordinates={projectData.coordinates} location={projectData.location} />
+        </div>
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
+          <div className="text-center max-w-4xl mx-auto p-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">{projectData.projectName}</h2>
+            <p className="text-xl md:text-2xl mb-6">{projectData.description}</p>
+            <div className="inline-flex items-center bg-blue-600 px-6 py-3 rounded-lg text-lg font-semibold">
+              <Calendar className="h-5 w-5 mr-2" />
+              <span>Progress: {progressPercentage}% Complete</span>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {/* Main Content */}
       <main className="flex-grow container mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
-        {/* Left Column - Map and Image */}
+        {/* Left Column - Content */}
         <div className="lg:w-2/3 flex flex-col space-y-6">
           {/* Project Info Panel */}
           {showInfo && (
@@ -107,12 +121,6 @@ function App() {
                 caption={`${currentTimelineItem.title}: ${currentTimelineItem.description}`} 
               />
             </div>
-          </div>
-          
-          {/* Project Map */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Project Location</h2>
-            <ProjectMap coordinates={projectData.coordinates} location={projectData.location} />
           </div>
         </div>
         
