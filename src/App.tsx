@@ -139,7 +139,7 @@ function App() {
       
       {/* Footer */}
       <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>© {new Date().getFullYear()} {projectData.projectName} - Drone Imagery Construction Tracker</p>
+        <p>© {new Date().getFullYear()} {projectData.projectName} - Rogue Drones</p>
       </footer>
     </div>
   );
