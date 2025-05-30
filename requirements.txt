@@ -1,5 +1,0 @@
-# requirements.txt
-# Node.js dependencies are managed through package.json
-# This file is for any Python dependencies that might be needed for auxiliary scripts
-
-# No Python dependencies required for this project
