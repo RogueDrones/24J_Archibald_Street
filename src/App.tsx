@@ -1,7 +1,7 @@
-// src/App.tsx
+// src/App.tsx - Clean hero with just title over map
 
-import { useState } from 'react';
-import { Calendar, Home } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar } from 'lucide-react';
 import ProjectMap from './components/ProjectMap';
 import Timeline from './components/Timeline';
 import ImageViewer from './components/ImageViewer';
@@ -9,6 +9,11 @@ import { projectData } from './data/projectData';
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(projectData.timeline[0].date);
+  
+  // Force scroll to top on page load/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const currentTimelineIndex = projectData.timeline.findIndex(
     item => item.date === selectedDate
@@ -19,114 +24,107 @@ function App() {
   const progressPercentage = Math.round((completedPhases / projectData.timeline.length) * 100);
   
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-blue-800/90 text-white p-4 shadow-md relative z-10">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Home className="h-6 w-6" />
-            <h1 className="text-xl md:text-2xl font-bold">{projectData.projectName}</h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section with Map Background */}
-      <div className="relative h-[60vh] overflow-hidden">
-        <div className="absolute inset-0">
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section - Just title over map */}
+      <section className="relative h-[70vh] overflow-hidden">
+        {/* Background Map */}
+        <div className="absolute inset-0 z-10">
           <ProjectMap coordinates={projectData.coordinates} location={projectData.location} />
         </div>
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
-          <div className="text-center max-w-4xl mx-auto p-6">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">{projectData.projectName}</h2>
-            <p className="text-xl md:text-2xl mb-6">{projectData.description}</p>
-            <div className="inline-flex items-center bg-blue-600 px-6 py-3 rounded-lg text-lg font-semibold">
-              <Calendar className="h-5 w-5 mr-2" />
-              <span>Progress: {progressPercentage}% Complete</span>
-            </div>
-          </div>
+        
+        {/* Simple dark overlay for title readability */}
+        <div className="absolute inset-0 z-20 bg-black/30"></div>
+        
+        {/* Title positioned at top - doesn't cover marker */}
+        <div className="absolute top-20 left-0 right-0 z-30 flex justify-center pt-16">
+          <h1 className="text-5xl md:text-7xl font-bold text-white text-shadow-lg">
+            {projectData.projectName}
+          </h1>
         </div>
-      </div>
+      </section>
       
-      {/* Main Content */}
-      <main className="flex-grow container mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
-        {/* Left Column - Content */}
-        <div className="lg:w-2/3 flex flex-col space-y-6">
-          {/* Project Info Panel - Now permanently visible */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-2">About This Project</h2>
-            <p className="text-gray-700 mb-3">{projectData.description}</p>
-            
-            {/* Project Overview Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <h3 className="font-medium text-gray-900">Location</h3>
-                <p className="text-gray-600">{projectData.location}</p>
+      {/* Main Content - Overlapping the hero section */}
+      <main className="container mx-auto p-6 -mt-8 relative z-40">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Column - Content */}
+          <div className="lg:w-2/3 space-y-8">
+            {/* Project Info Panel */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">About This Project</h2>
+              <p className="text-gray-700 mb-6 leading-relaxed">{projectData.description}</p>
+              
+              {/* Project Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Location</h3>
+                  <p className="text-gray-600">{projectData.location}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Project Area</h3>
+                  <p className="text-gray-600">{projectData.area}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Start Date</h3>
+                  <p className="text-gray-600">{projectData.startDate}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Estimated Completion</h3>
+                  <p className="text-gray-600">{projectData.estimatedCompletion}</p>
+                </div>
               </div>
+              
+              {/* Progress Bar */}
               <div>
-                <h3 className="font-medium text-gray-900">Project Area</h3>
-                <p className="text-gray-600">{projectData.area}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Start Date</h3>
-                <p className="text-gray-600">{projectData.startDate}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Estimated Completion</h3>
-                <p className="text-gray-600">{projectData.estimatedCompletion}</p>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold text-gray-900">Overall Progress</h3>
+                  <span className="text-lg font-bold text-blue-600">{progressPercentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-700 ease-out" 
+                    style={{ width: `${progressPercentage}%` }}
+                  ></div>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {completedPhases} of {projectData.timeline.length} phases completed
+                </p>
               </div>
             </div>
             
-            {/* Progress Bar */}
-            <div className="mt-2">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="font-medium text-gray-900">Overall Progress</h3>
-                <span className="text-sm font-medium text-blue-700">{progressPercentage}%</span>
+            {/* Current Image View */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">{currentTimelineItem.title}</h2>
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <Calendar className="h-5 w-5" />
+                  <span className="font-medium">{selectedDate}</span>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full" 
-                  style={{ width: `${progressPercentage}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {completedPhases} of {projectData.timeline.length} phases completed
-              </p>
+              <ImageViewer images={currentTimelineItem.images} />
             </div>
           </div>
           
-          {/* Current Image View */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">{currentTimelineItem.title}</h2>
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                <span className="font-medium">{selectedDate}</span>
-              </div>
-            </div>
-            <div className="relative">
-              <ImageViewer 
-                images={currentTimelineItem.images}
+          {/* Right Column - Timeline */}
+          <div className="lg:w-1/3">
+            <div className="bg-white p-6 rounded-xl shadow-lg sticky top-8">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">Construction Timeline</h2>
+              <Timeline 
+                timelineData={projectData.timeline} 
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
               />
             </div>
-          </div>
-        </div>
-        
-        {/* Right Column - Timeline */}
-        <div className="lg:w-1/3">
-          <div className="bg-white p-4 rounded-lg shadow-md sticky top-4">
-            <h2 className="text-xl font-semibold mb-4">Construction Timeline</h2>
-            <Timeline 
-              timelineData={projectData.timeline} 
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-            />
           </div>
         </div>
       </main>
       
       {/* Footer */}
-      <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>{projectData.projectName} © {new Date().getFullYear()} - Rogue Drones</p>
+      <footer className="bg-gray-800 text-white p-6 mt-12">
+        <div className="container mx-auto text-center">
+          <p className="text-gray-300">
+            {projectData.projectName} © {new Date().getFullYear()} - Rogue Drones
+          </p>
+        </div>
       </footer>
     </div>
   );

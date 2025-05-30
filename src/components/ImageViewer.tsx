@@ -56,13 +56,13 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
     });
   };
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  }, [images.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  }, [images.length]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -80,7 +80,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showModal]);
+  }, [showModal, handleNext, handlePrev]);
 
   const displayImage = images && images.length > 0 ? images[currentIndex] : '';
   const isLoading = loadingStates[currentIndex];
