@@ -1,7 +1,7 @@
-// src/components/ImageViewer.tsx
+// src/components/ImageViewer.tsx - Optimized Version
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
 
 interface ImageViewerProps {
   images: string[];
@@ -11,11 +11,50 @@ interface ImageViewerProps {
 const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [loadingStates, setLoadingStates] = useState<boolean[]>([]);
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
 
-  // Reset currentIndex when the images prop changes
+  // Reset when images change
   useEffect(() => {
     setCurrentIndex(0);
+    setLoadingStates(new Array(images.length).fill(true));
+    setPreloadedImages(new Set());
   }, [images]);
+
+  // Preload adjacent images for faster navigation
+  const preloadImage = useCallback((src: string) => {
+    if (!preloadedImages.has(src)) {
+      const img = new Image();
+      img.onload = () => {
+        setPreloadedImages(prev => new Set([...prev, src]));
+      };
+      img.src = src;
+    }
+  }, [preloadedImages]);
+
+  // Preload current, next, and previous images
+  useEffect(() => {
+    if (images.length > 0) {
+      // Current image
+      preloadImage(images[currentIndex]);
+      
+      // Next image
+      const nextIndex = currentIndex === images.length - 1 ? 0 : currentIndex + 1;
+      preloadImage(images[nextIndex]);
+      
+      // Previous image
+      const prevIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
+      preloadImage(images[prevIndex]);
+    }
+  }, [currentIndex, images, preloadImage]);
+
+  const handleImageLoad = (index: number) => {
+    setLoadingStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = false;
+      return newStates;
+    });
+  };
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -41,54 +80,73 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showModal, images.length]);
+  }, [showModal]);
 
   const displayImage = images && images.length > 0 ? images[currentIndex] : '';
+  const isLoading = loadingStates[currentIndex];
 
   return (
     <>
       {/* Main image container */}
-      <div className="relative w-full aspect-video">
-        {/* Left Arrow */}
-        {images.length > 1 && (
-          <button
-            onClick={handlePrev}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
+      <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
+        {/* Loading spinner */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <span className="ml-2 text-gray-500">Loading image...</span>
+          </div>
         )}
 
-        {/* Right Arrow */}
+        {/* Navigation arrows */}
         {images.length > 1 && (
-          <button
-            onClick={handleNext}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10 transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10 transition-colors"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </>
         )}
 
-        {/* Main image display */}
+        {/* Main image display with optimizations */}
         <img
           src={displayImage}
-          alt="Construction site aerial view"
-          className="object-contain w-full h-full cursor-pointer"
-          onClick={() => setShowModal(true)} // Open modal on click
+          alt={`Construction site aerial view ${currentIndex + 1}`}
+          className={`object-contain w-full h-full cursor-pointer transition-opacity duration-300 ${
+            isLoading ? 'opacity-0' : 'opacity-100'
+          }`}
+          loading="lazy" // Native lazy loading
+          decoding="async" // Async image decoding
+          onClick={() => setShowModal(true)}
+          onLoad={() => handleImageLoad(currentIndex)}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;
-            target.src =
-              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 200'%3E%3Crect fill='%23f0f0f0' width='300' height='200'/%3E%3Ctext fill='%23cccccc' font-family='sans-serif' font-size='24' text-anchor='middle' x='150' y='100'%3ENo image available%3C/text%3E%3C/svg%3E";
+            target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 200'%3E%3Crect fill='%23f0f0f0' width='300' height='200'/%3E%3Ctext fill='%23cccccc' font-family='sans-serif' font-size='18' text-anchor='middle' x='150' y='100'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+            handleImageLoad(currentIndex);
           }}
         />
 
-        {/* “Click to Enlarge” indicator */}
+        {/* Click to enlarge indicator */}
         <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
           Click to enlarge
         </div>
 
-        {/* Caption along the bottom */}
+        {/* Image counter */}
+        {images.length > 1 && (
+          <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+            {currentIndex + 1} / {images.length}
+          </div>
+        )}
+
+        {/* Caption */}
         {caption && (
           <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 text-sm">
             {caption}
@@ -96,18 +154,17 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
         )}
       </div>
 
-      {/* --- Modal for Full-Size View --- */}
+      {/* Modal for Full-Size View */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center"
           onClick={() => setShowModal(false)}
         >
-          {/* Container for image and navigation controls */}
           <div 
             onClick={(e) => e.stopPropagation()} 
-            className="relative max-w-[90vw] max-h-[90vh]"
+            className="relative max-w-[95vw] max-h-[95vh]"
           >
-            {/* Navigation arrows in modal */}
+            {/* Modal navigation arrows */}
             {images.length > 1 && (
               <>
                 <button
@@ -125,10 +182,20 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
               </>
             )}
 
+            {/* Modal loading state */}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-white" />
+              </div>
+            )}
+
             <img
               src={displayImage}
               alt="Full size view"
-              className="max-w-full max-h-[90vh] object-contain"
+              className={`max-w-full max-h-[95vh] object-contain transition-opacity duration-300 ${
+                isLoading ? 'opacity-50' : 'opacity-100'
+              }`}
+              loading="eager" // Load immediately in modal
             />
 
             {/* Close button */}
@@ -139,7 +206,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
               <X className="h-6 w-6" />
             </button>
 
-            {/* Image counter */}
+            {/* Modal image counter */}
             {images.length > 1 && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
                 {currentIndex + 1} / {images.length}
