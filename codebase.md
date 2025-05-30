@@ -1,26 +1,3 @@
-# .bolt\config.json
-
-```json
-{
-  "template": "bolt-vite-react-ts"
-}
-
-```
-
-# .bolt\prompt
-
-```
-For all designs I ask you to make, have them be beautiful, not cookie cutter. Make webpages that are fully featured and worthy for production.
-
-By default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.
-
-Use icons from lucide-react for logos.
-
-Use stock photos from unsplash where appropriate, only valid URLs you know exist. Do not download the images, only link to them in image tags.
-
-
-```
-
 # .cspell.json
 
 ```json
@@ -1162,6 +1139,7 @@ export default tseslint.config(
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@rollup/rollup-win32-x64-msvc": "^4.41.1",
     "@types/leaflet": "^1.9.16",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
@@ -1388,23 +1366,13 @@ For questions or support, please contact the project maintainer at your.email@ex
 
 ```
 
-# requirements.txt
-
-```txt
-# requirements.txt
-# Node.js dependencies are managed through package.json
-# This file is for any Python dependencies that might be needed for auxiliary scripts
-
-# No Python dependencies required for this project
-```
-
 # src\App.tsx
 
 ```tsx
-// src/App.tsx
+// src/App.tsx - Clean hero with just title over map
 
-import { useState } from 'react';
-import { Calendar, Home } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar } from 'lucide-react';
 import ProjectMap from './components/ProjectMap';
 import Timeline from './components/Timeline';
 import ImageViewer from './components/ImageViewer';
@@ -1412,6 +1380,11 @@ import { projectData } from './data/projectData';
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(projectData.timeline[0].date);
+  
+  // Force scroll to top on page load/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const currentTimelineIndex = projectData.timeline.findIndex(
     item => item.date === selectedDate
@@ -1422,114 +1395,107 @@ function App() {
   const progressPercentage = Math.round((completedPhases / projectData.timeline.length) * 100);
   
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-blue-800/90 text-white p-4 shadow-md relative z-10">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Home className="h-6 w-6" />
-            <h1 className="text-xl md:text-2xl font-bold">{projectData.projectName}</h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section with Map Background */}
-      <div className="relative h-[60vh] overflow-hidden">
-        <div className="absolute inset-0">
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section - Just title over map */}
+      <section className="relative h-[70vh] overflow-hidden">
+        {/* Background Map */}
+        <div className="absolute inset-0 z-10">
           <ProjectMap coordinates={projectData.coordinates} location={projectData.location} />
         </div>
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
-          <div className="text-center max-w-4xl mx-auto p-6">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">{projectData.projectName}</h2>
-            <p className="text-xl md:text-2xl mb-6">{projectData.description}</p>
-            <div className="inline-flex items-center bg-blue-600 px-6 py-3 rounded-lg text-lg font-semibold">
-              <Calendar className="h-5 w-5 mr-2" />
-              <span>Progress: {progressPercentage}% Complete</span>
-            </div>
-          </div>
+        
+        {/* Simple dark overlay for title readability */}
+        <div className="absolute inset-0 z-20 bg-black/30"></div>
+        
+        {/* Title positioned at top - doesn't cover marker */}
+        <div className="absolute top-0 left-0 right-0 z-30 flex justify-center pt-16">
+          <h1 className="text-5xl md:text-7xl font-bold text-white text-shadow-lg">
+            {projectData.projectName}
+          </h1>
         </div>
-      </div>
+      </section>
       
-      {/* Main Content */}
-      <main className="flex-grow container mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
-        {/* Left Column - Content */}
-        <div className="lg:w-2/3 flex flex-col space-y-6">
-          {/* Project Info Panel - Now permanently visible */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-2">About This Project</h2>
-            <p className="text-gray-700 mb-3">{projectData.description}</p>
-            
-            {/* Project Overview Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <h3 className="font-medium text-gray-900">Location</h3>
-                <p className="text-gray-600">{projectData.location}</p>
+      {/* Main Content - Overlapping the hero section */}
+      <main className="container mx-auto p-6 -mt-8 relative z-40">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Column - Content */}
+          <div className="lg:w-2/3 space-y-8">
+            {/* Project Info Panel */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">About This Project</h2>
+              <p className="text-gray-700 mb-6 leading-relaxed">{projectData.description}</p>
+              
+              {/* Project Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Location</h3>
+                  <p className="text-gray-600">{projectData.location}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Project Area</h3>
+                  <p className="text-gray-600">{projectData.area}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Start Date</h3>
+                  <p className="text-gray-600">{projectData.startDate}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-2">Estimated Completion</h3>
+                  <p className="text-gray-600">{projectData.estimatedCompletion}</p>
+                </div>
               </div>
+              
+              {/* Progress Bar */}
               <div>
-                <h3 className="font-medium text-gray-900">Project Area</h3>
-                <p className="text-gray-600">{projectData.area}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Start Date</h3>
-                <p className="text-gray-600">{projectData.startDate}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Estimated Completion</h3>
-                <p className="text-gray-600">{projectData.estimatedCompletion}</p>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold text-gray-900">Overall Progress</h3>
+                  <span className="text-lg font-bold text-blue-600">{progressPercentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-700 ease-out" 
+                    style={{ width: `${progressPercentage}%` }}
+                  ></div>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {completedPhases} of {projectData.timeline.length} phases completed
+                </p>
               </div>
             </div>
             
-            {/* Progress Bar */}
-            <div className="mt-2">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="font-medium text-gray-900">Overall Progress</h3>
-                <span className="text-sm font-medium text-blue-700">{progressPercentage}%</span>
+            {/* Current Image View */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">{currentTimelineItem.title}</h2>
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <Calendar className="h-5 w-5" />
+                  <span className="font-medium">{selectedDate}</span>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full" 
-                  style={{ width: `${progressPercentage}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {completedPhases} of {projectData.timeline.length} phases completed
-              </p>
+              <ImageViewer images={currentTimelineItem.images} />
             </div>
           </div>
           
-          {/* Current Image View */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">{currentTimelineItem.title}</h2>
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                <span className="font-medium">{selectedDate}</span>
-              </div>
-            </div>
-            <div className="relative">
-              <ImageViewer 
-                images={currentTimelineItem.images}
+          {/* Right Column - Timeline */}
+          <div className="lg:w-1/3">
+            <div className="bg-white p-6 rounded-xl shadow-lg sticky top-8">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">Construction Timeline</h2>
+              <Timeline 
+                timelineData={projectData.timeline} 
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
               />
             </div>
-          </div>
-        </div>
-        
-        {/* Right Column - Timeline */}
-        <div className="lg:w-1/3">
-          <div className="bg-white p-4 rounded-lg shadow-md sticky top-4">
-            <h2 className="text-xl font-semibold mb-4">Construction Timeline</h2>
-            <Timeline 
-              timelineData={projectData.timeline} 
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-            />
           </div>
         </div>
       </main>
       
       {/* Footer */}
-      <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>{projectData.projectName} © {new Date().getFullYear()} - Rogue Drones</p>
+      <footer className="bg-gray-800 text-white p-6 mt-12">
+        <div className="container mx-auto text-center">
+          <p className="text-gray-300">
+            {projectData.projectName} © {new Date().getFullYear()} - Rogue Drones
+          </p>
+        </div>
       </footer>
     </div>
   );
@@ -1541,10 +1507,10 @@ export default App;
 # src\components\ImageViewer.tsx
 
 ```tsx
-// src/components/ImageViewer.tsx
+// src/components/ImageViewer.tsx - Optimized Version
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
 
 interface ImageViewerProps {
   images: string[];
@@ -1554,19 +1520,58 @@ interface ImageViewerProps {
 const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [loadingStates, setLoadingStates] = useState<boolean[]>([]);
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
 
-  // Reset currentIndex when the images prop changes
+  // Reset when images change
   useEffect(() => {
     setCurrentIndex(0);
+    setLoadingStates(new Array(images.length).fill(true));
+    setPreloadedImages(new Set());
   }, [images]);
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  // Preload adjacent images for faster navigation
+  const preloadImage = useCallback((src: string) => {
+    if (!preloadedImages.has(src)) {
+      const img = new Image();
+      img.onload = () => {
+        setPreloadedImages(prev => new Set([...prev, src]));
+      };
+      img.src = src;
+    }
+  }, [preloadedImages]);
+
+  // Preload current, next, and previous images
+  useEffect(() => {
+    if (images.length > 0) {
+      // Current image
+      preloadImage(images[currentIndex]);
+      
+      // Next image
+      const nextIndex = currentIndex === images.length - 1 ? 0 : currentIndex + 1;
+      preloadImage(images[nextIndex]);
+      
+      // Previous image
+      const prevIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
+      preloadImage(images[prevIndex]);
+    }
+  }, [currentIndex, images, preloadImage]);
+
+  const handleImageLoad = (index: number) => {
+    setLoadingStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = false;
+      return newStates;
+    });
   };
 
-  const handleNext = () => {
+  const handlePrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  }, [images.length]);
+
+  const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  }, [images.length]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -1584,54 +1589,73 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showModal, images.length]);
+  }, [showModal, handleNext, handlePrev]);
 
   const displayImage = images && images.length > 0 ? images[currentIndex] : '';
+  const isLoading = loadingStates[currentIndex];
 
   return (
     <>
       {/* Main image container */}
-      <div className="relative w-full aspect-video">
-        {/* Left Arrow */}
-        {images.length > 1 && (
-          <button
-            onClick={handlePrev}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
+      <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
+        {/* Loading spinner */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <span className="ml-2 text-gray-500">Loading image...</span>
+          </div>
         )}
 
-        {/* Right Arrow */}
+        {/* Navigation arrows */}
         {images.length > 1 && (
-          <button
-            onClick={handleNext}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10 transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-10 transition-colors"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </>
         )}
 
-        {/* Main image display */}
+        {/* Main image display with optimizations */}
         <img
           src={displayImage}
-          alt="Construction site aerial view"
-          className="object-contain w-full h-full cursor-pointer"
-          onClick={() => setShowModal(true)} // Open modal on click
+          alt={`Construction site aerial view ${currentIndex + 1}`}
+          className={`object-contain w-full h-full cursor-pointer transition-opacity duration-300 ${
+            isLoading ? 'opacity-0' : 'opacity-100'
+          }`}
+          loading="lazy" // Native lazy loading
+          decoding="async" // Async image decoding
+          onClick={() => setShowModal(true)}
+          onLoad={() => handleImageLoad(currentIndex)}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;
-            target.src =
-              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 200'%3E%3Crect fill='%23f0f0f0' width='300' height='200'/%3E%3Ctext fill='%23cccccc' font-family='sans-serif' font-size='24' text-anchor='middle' x='150' y='100'%3ENo image available%3C/text%3E%3C/svg%3E";
+            target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 200'%3E%3Crect fill='%23f0f0f0' width='300' height='200'/%3E%3Ctext fill='%23cccccc' font-family='sans-serif' font-size='18' text-anchor='middle' x='150' y='100'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+            handleImageLoad(currentIndex);
           }}
         />
 
-        {/* “Click to Enlarge” indicator */}
+        {/* Click to enlarge indicator */}
         <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
           Click to enlarge
         </div>
 
-        {/* Caption along the bottom */}
+        {/* Image counter */}
+        {images.length > 1 && (
+          <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+            {currentIndex + 1} / {images.length}
+          </div>
+        )}
+
+        {/* Caption */}
         {caption && (
           <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 text-sm">
             {caption}
@@ -1639,18 +1663,17 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
         )}
       </div>
 
-      {/* --- Modal for Full-Size View --- */}
+      {/* Modal for Full-Size View */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center"
           onClick={() => setShowModal(false)}
         >
-          {/* Container for image and navigation controls */}
           <div 
             onClick={(e) => e.stopPropagation()} 
-            className="relative max-w-[90vw] max-h-[90vh]"
+            className="relative max-w-[95vw] max-h-[95vh]"
           >
-            {/* Navigation arrows in modal */}
+            {/* Modal navigation arrows */}
             {images.length > 1 && (
               <>
                 <button
@@ -1668,10 +1691,20 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
               </>
             )}
 
+            {/* Modal loading state */}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-white" />
+              </div>
+            )}
+
             <img
               src={displayImage}
               alt="Full size view"
-              className="max-w-full max-h-[90vh] object-contain"
+              className={`max-w-full max-h-[95vh] object-contain transition-opacity duration-300 ${
+                isLoading ? 'opacity-50' : 'opacity-100'
+              }`}
+              loading="eager" // Load immediately in modal
             />
 
             {/* Close button */}
@@ -1682,7 +1715,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
               <X className="h-6 w-6" />
             </button>
 
-            {/* Image counter */}
+            {/* Modal image counter */}
             {images.length > 1 && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
                 {currentIndex + 1} / {images.length}
@@ -1696,13 +1729,14 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, caption }) => {
 };
 
 export default ImageViewer;
-
 ```
 
 # src\components\ProjectMap.tsx
 
 ```tsx
-import React, { useEffect, useState } from 'react';
+// src/components/ProjectMap.tsx - KML fades in after zoom completes
+
+import React, { useEffect, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Marker, useMap } from 'react-leaflet';
 import toGeoJSON from '@mapbox/togeojson';
 import 'leaflet/dist/leaflet.css';
@@ -1723,32 +1757,61 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-// Component to handle the zoom animation
-function ZoomAnimation({ coordinates }: { coordinates: { lat: number; lng: number } }) {
+// Component to handle smooth zoom animation and KML fade-in timing
+function SmoothZoomAnimation({ 
+  coordinates, 
+  onZoomComplete 
+}: { 
+  coordinates: { lat: number; lng: number };
+  onZoomComplete: () => void;
+}) {
   const map = useMap();
+  const [hasZoomed, setHasZoomed] = useState(false);
   
   useEffect(() => {
-    // Start with a wider view
-    map.setView([coordinates.lat, coordinates.lng], 12, { animate: false });
+    // Prevent multiple zoom animations
+    if (hasZoomed) return;
     
-    // After a short delay, zoom in smoothly
-    setTimeout(() => {
+    // Start with a moderate wide view
+    map.setView([coordinates.lat, coordinates.lng], 14, { animate: false });
+    
+    // Smooth zoom in
+    const timeoutId = setTimeout(() => {
       map.flyTo([coordinates.lat, coordinates.lng], 17, {
-        duration: 2.5, // Animation duration in seconds
-        easeLinearity: 0.25
+        duration: 4.0,
+        easeLinearity: 0.04,
+        noMoveStart: false
       });
-    }, 500);
-  }, [map, coordinates]);
+      
+      setHasZoomed(true); // Mark as zoomed
+      
+      // Call onZoomComplete after zoom animation finishes + small delay
+      setTimeout(() => {
+        onZoomComplete();
+      }, 3500 + 500); // 3.5s zoom + 0.5s delay
+      
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
+  }, [map, coordinates, onZoomComplete, hasZoomed]);
 
   return null;
 }
 
 const ProjectMap: React.FC<ProjectMapProps> = ({ coordinates }) => {
   const [geoJson, setGeoJson] = useState<GeoJSON.GeoJsonObject | null>(null);
+  const [showKML, setShowKML] = useState(false);
+  const [kmlOpacity, setKmlOpacity] = useState(0);
 
+  // Load KML data immediately but don't show it yet
   useEffect(() => {
-    fetch('/24j_Archibald_Street_Perimeter.kml')
-      .then((response) => response.text())
+    fetch('./24j_Archibald_Street_Perimeter.kml')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`KML fetch failed: ${response.status} ${response.statusText}`);
+        }
+        return response.text();
+      })
       .then((kmlText) => {
         const parser = new DOMParser();
         const kmlDom = parser.parseFromString(kmlText, 'text/xml');
@@ -1760,23 +1823,69 @@ const ProjectMap: React.FC<ProjectMapProps> = ({ coordinates }) => {
       });
   }, []);
 
+  // Handle zoom completion - trigger KML fade-in (memoized to prevent loops)
+  const handleZoomComplete = useCallback(() => {
+    // Only proceed if not already showing KML
+    if (showKML) return;
+    
+    setShowKML(true);
+    
+    // Smooth fade-in animation
+    let opacity = 0;
+    const fadeInterval = setInterval(() => {
+      opacity += 0.02; // Increase opacity gradually
+      setKmlOpacity(opacity);
+      
+      if (opacity >= 1) {
+        clearInterval(fadeInterval);
+        setKmlOpacity(1);
+      }
+    }, 30); // Update every 30ms for smooth animation
+  }, [showKML]);
+
+  // KML styling - clean and visible
+  const geoJsonStyle = {
+    color: '#FF4444',
+    weight: 2,
+    opacity: kmlOpacity, // Animated opacity
+    fillColor: '#FF4444',
+    fillOpacity: kmlOpacity * 0.15, // Fade fill opacity too
+  };
+
   return (
     <MapContainer 
       center={[coordinates.lat, coordinates.lng]} 
-      zoom={12} // Start with a wider view
+      zoom={14}
       style={{ height: '100%', width: '100%' }}
       zoomControl={false}
       attributionControl={false}
       dragging={false}
       scrollWheelZoom={false}
       doubleClickZoom={false}
+      fadeAnimation={true}
+      zoomAnimation={true}
+      markerZoomAnimation={true}
     >
-      <ZoomAnimation coordinates={coordinates} />
+      <SmoothZoomAnimation 
+        coordinates={coordinates} 
+        onZoomComplete={handleZoomComplete}
+      />
+      
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap contributors"
+        keepBuffer={2}
       />
-      {geoJson && <GeoJSON data={geoJson} style={() => ({ color: '#FF0000', weight: 3 })} />}
+      
+      {/* KML boundary - only shows after zoom complete, with fade-in */}
+      {showKML && geoJson && (
+        <GeoJSON 
+          data={geoJson} 
+          style={() => geoJsonStyle}
+        />
+      )}
+      
+      {/* Marker - shows immediately */}
       <Marker 
         position={[coordinates.lat, coordinates.lng]} 
         icon={customIcon}
@@ -1786,7 +1895,6 @@ const ProjectMap: React.FC<ProjectMapProps> = ({ coordinates }) => {
 };
 
 export default ProjectMap;
-
 ```
 
 # src\components\Timeline.tsx
@@ -2214,6 +2322,51 @@ button:focus {
   .bg-white {
     box-shadow: none;
     border: 1px solid #eee;
+  }
+}
+
+/* Hero title responsive styling */
+.hero-title {
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+  line-height: 1.1;
+}
+
+/* Mobile first approach */
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 1.875rem; /* 30px - much smaller for mobile */
+    line-height: 1.2;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+}
+
+/* Tablet */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hero-title {
+    font-size: 2.5rem; /* 40px - good for tablets */
+    line-height: 1.1;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .hero-title {
+    font-size: 4rem; /* 64px - large for desktop */
+    line-height: 1;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+  .hero-title {
+    font-size: 5rem; /* 80px - very large for big screens */
   }
 }
 ```

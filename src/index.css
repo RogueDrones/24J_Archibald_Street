@@ -96,3 +96,63 @@ button:focus {
     border: 1px solid #eee;
   }
 }
+
+/* Hero title responsive styling - UPDATED */
+.hero-title {
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-align: center; /* Always center the title */
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+  line-height: 1.1;
+}
+
+/* Mobile first approach - FIXED */
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 1.5rem; /* 24px - smaller to fit on one line */
+    line-height: 1.2;
+    max-width: 280px;
+    margin: 0 auto;
+    text-align: center; /* Ensure center alignment on mobile */
+    padding: 0 1rem; /* Add some padding to prevent edge touching */
+  }
+}
+
+/* Small mobile (very narrow screens) */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.25rem; /* 20px - even smaller for very narrow screens */
+    line-height: 1.3;
+    max-width: 250px;
+    padding: 0 0.5rem;
+  }
+}
+
+/* Tablet */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hero-title {
+    font-size: 2.5rem; /* 40px - good for tablets */
+    line-height: 1.1;
+    text-align: center;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .hero-title {
+    font-size: 4rem; /* 64px - large for desktop */
+    line-height: 1;
+    text-align: center;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+  .hero-title {
+    font-size: 5rem; /* 80px - very large for big screens */
+    text-align: center;
+  }
+}

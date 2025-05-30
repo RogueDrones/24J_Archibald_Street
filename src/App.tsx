@@ -35,9 +35,9 @@ function App() {
         {/* Simple dark overlay for title readability */}
         <div className="absolute inset-0 z-20 bg-black/30"></div>
         
-        {/* Title positioned at top - doesn't cover marker */}
-        <div className="absolute top-20 left-0 right-0 z-30 flex justify-center pt-16">
-          <h1 className="text-5xl md:text-7xl font-bold text-white text-shadow-lg">
+        {/* Title positioned at top - UPDATED for better mobile centering */}
+        <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-center pt-12 px-4">
+          <h1 className="hero-title">
             {projectData.projectName}
           </h1>
         </div>
